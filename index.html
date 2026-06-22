@@ -1,0 +1,776 @@
+﻿<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes" />
+    <title>AI魔镜 · 多维肌肤诊断</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" />
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, 'Segoe UI', Roboto, sans-serif;
+        }
+
+        body {
+            background: #f3ebe6;
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding: 12px;
+        }
+
+        .app-card {
+            max-width: 420px;
+            width: 100%;
+            background: #ffffff;
+            border-radius: 32px;
+            padding: 20px 18px 28px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.10);
+            margin: 10px auto;
+        }
+
+        .brand-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .brand-header .logo {
+            font-weight: 700;
+            font-size: 20px;
+            color: #2d1b12;
+        }
+
+        .brand-header .logo i {
+            color: #c4845d;
+        }
+
+        .brand-header .badge {
+            background: #efe4dd;
+            padding: 4px 14px;
+            border-radius: 30px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #4f3222;
+        }
+
+        h1 {
+            font-size: 22px;
+            font-weight: 700;
+            color: #1f130d;
+        }
+
+        h1 i {
+            color: #c4845d;
+            margin-right: 6px;
+        }
+
+        .sub {
+            color: #6b4f3d;
+            font-size: 13px;
+            margin: 2px 0 12px;
+        }
+
+        /* ----- 上传区 ----- */
+        .upload-zone {
+            background: #f7f1ec;
+            border-radius: 24px;
+            padding: 14px 12px;
+            border: 2px dashed #dcc9bd;
+            text-align: center;
+            cursor: pointer;
+            margin: 10px 0 14px;
+            transition: 0.15s;
+        }
+
+        .upload-zone .preview {
+            width: 72px;
+            height: 72px;
+            border-radius: 50%;
+            background: #e0cec2;
+            margin: 0 auto 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 30px;
+            color: #7e5f4b;
+            overflow: hidden;
+            border: 3px solid white;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+        }
+
+        .upload-zone .preview img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .upload-zone .hint {
+            font-weight: 500;
+            color: #3d2b1f;
+            font-size: 14px;
+        }
+
+        .upload-zone .hint i {
+            color: #b28062;
+        }
+
+        #photoInput {
+            display: none;
+        }
+
+        /* ----- 三个选择区块 ----- */
+        .selector-block {
+            margin: 12px 0 10px;
+        }
+
+        .selector-block .block-label {
+            font-weight: 600;
+            font-size: 13px;
+            color: #3f2c1e;
+            display: block;
+            margin-bottom: 6px;
+        }
+
+        .selector-block .block-label i {
+            width: 22px;
+            color: #a76f52;
+        }
+
+        .option-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .option-group button {
+            flex: 1;
+            min-width: 52px;
+            padding: 7px 4px;
+            border-radius: 30px;
+            border: 2px solid #e5d7ce;
+            background: white;
+            font-weight: 500;
+            font-size: 12px;
+            color: #3d2b1f;
+            transition: 0.1s;
+            cursor: pointer;
+        }
+
+        .option-group button.active {
+            background: #2d1b12;
+            color: white;
+            border-color: #2d1b12;
+        }
+
+        .option-group button:active {
+            transform: scale(0.94);
+        }
+
+        /* 饮食选择（多选风格） */
+        .diet-group {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+        }
+
+        .diet-group button {
+            flex: 1;
+            min-width: 50px;
+            padding: 6px 4px;
+            border-radius: 30px;
+            border: 2px solid #e5d7ce;
+            background: white;
+            font-weight: 500;
+            font-size: 12px;
+            color: #3d2b1f;
+            transition: 0.1s;
+            cursor: pointer;
+        }
+
+        .diet-group button.active {
+            background: #2d1b12;
+            color: white;
+            border-color: #2d1b12;
+        }
+
+        .diet-group button:active {
+            transform: scale(0.94);
+        }
+
+        .diet-hint {
+            font-size: 11px;
+            color: #8a7060;
+            margin-top: 4px;
+        }
+
+        /* ----- 诊断按钮 ----- */
+        .diagnose-btn {
+            width: 100%;
+            background: #2d1b12;
+            border: none;
+            padding: 15px;
+            border-radius: 60px;
+            color: white;
+            font-weight: 700;
+            font-size: 17px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin: 12px 0;
+            box-shadow: 0 6px 20px rgba(45, 27, 18, 0.25);
+            cursor: pointer;
+        }
+
+        .diagnose-btn:active {
+            transform: scale(0.96);
+        }
+
+        /* ----- 结果卡片 ----- */
+        .result-card {
+            background: #fcf9f7;
+            border-radius: 24px;
+            padding: 16px;
+            border: 1px solid #eee2da;
+            display: none;
+            margin-top: 12px;
+        }
+
+        .result-card.show {
+            display: block;
+            animation: fadeUp 0.4s ease;
+        }
+
+        @keyframes fadeUp {
+            0% {
+                opacity: 0;
+                transform: translateY(18px);
+            }
+            100% {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .result-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #ece0d8;
+            padding-bottom: 10px;
+            margin-bottom: 10px;
+        }
+
+        .result-header span {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .skin-tag {
+            background: #e9dbd2;
+            padding: 3px 14px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+
+        .report-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 7px 0;
+            border-bottom: 1px solid #f0e6df;
+        }
+
+        .report-item:last-child {
+            border-bottom: none;
+        }
+
+        .report-item i {
+            width: 24px;
+            color: #a76f52;
+            font-size: 15px;
+            text-align: center;
+        }
+
+        .report-item .label {
+            font-weight: 600;
+            color: #1d130e;
+            flex: 1;
+            font-size: 13px;
+        }
+
+        .report-item .value {
+            font-size: 13px;
+            color: #5f4535;
+            text-align: right;
+            max-width: 170px;
+        }
+
+        /* 环境因素摘要 */
+        .env-summary {
+            background: #f2e9e3;
+            border-radius: 16px;
+            padding: 8px 12px;
+            margin: 6px 0 10px;
+            font-size: 12px;
+            color: #4f3728;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px 16px;
+        }
+
+        .env-summary i {
+            color: #a76f52;
+            margin-right: 3px;
+        }
+
+        .cta-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 12px;
+        }
+
+        .cta-row button {
+            flex: 1;
+            padding: 11px 6px;
+            border-radius: 60px;
+            font-weight: 600;
+            font-size: 13px;
+            border: 1.5px solid #d0b9ab;
+            background: #f5ede8;
+            color: #2f1d13;
+            cursor: pointer;
+        }
+
+        .cta-row button:active {
+            transform: scale(0.96);
+        }
+
+        .cta-row .primary {
+            background: #2d1b12;
+            border-color: #2d1b12;
+            color: white;
+        }
+
+        .footer-info {
+            margin-top: 14px;
+            display: flex;
+            justify-content: center;
+            gap: 16px;
+            font-size: 11px;
+            color: #6f5544;
+        }
+
+        .footer-info i {
+            color: #b28062;
+        }
+
+        .note {
+            text-align: center;
+            margin-top: 8px;
+            font-size: 10px;
+            color: #a78b7b;
+        }
+
+        /* 小屏适配 */
+        @media (max-width: 380px) {
+            .option-group button,
+            .diet-group button {
+                font-size: 10px;
+                min-width: 40px;
+                padding: 5px 2px;
+            }
+            .app-card {
+                padding: 14px 12px;
+            }
+            .brand-header .logo {
+                font-size: 17px;
+            }
+            h1 {
+                font-size: 19px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-card">
+
+        <!-- 品牌头 -->
+        <div class="brand-header">
+            <div class="logo"><i class="fas fa-leaf"></i> 植研所</div>
+            <div class="badge"><i class="fas fa-sparkles"></i> AI 多维诊断</div>
+        </div>
+
+        <h1><i class="fas fa-wand-magic-sparkles"></i> 智能肤质魔镜</h1>
+        <div class="sub">📸 上传照片 · 结合地域饮食 · 精准分析</div>
+
+        <!-- 上传区 -->
+        <div class="upload-zone" id="uploadZone">
+            <div class="preview" id="avatarPreview">
+                <i class="fas fa-camera-retro"></i>
+            </div>
+            <div class="hint"><i class="fas fa-cloud-upload-alt"></i> 点击上传素颜照</div>
+            <input type="file" id="photoInput" accept="image/*" />
+        </div>
+
+        <!-- 1. 地域选择 -->
+        <div class="selector-block">
+            <span class="block-label"><i class="fas fa-map-marker-alt"></i> 你所在的城市</span>
+            <div class="option-group" id="regionGroup">
+                <button data-region="north" class="active">🏔️ 北方</button>
+                <button data-region="south">🌴 南方</button>
+                <button data-region="west">🏜️ 西部</button>
+                <button data-region="coast">🌊 沿海</button>
+            </div>
+        </div>
+
+        <!-- 2. 季节选择 -->
+        <div class="selector-block">
+            <span class="block-label"><i class="fas fa-cloud-sun"></i> 当前季节</span>
+            <div class="option-group" id="seasonGroup">
+                <button data-season="0">❄️ 冬</button>
+                <button data-season="1" class="active">🌱 春</button>
+                <button data-season="2">☀️ 夏</button>
+                <button data-season="3">🍂 秋</button>
+            </div>
+        </div>
+
+        <!-- 3. 饮食选择（多选） -->
+        <div class="selector-block">
+            <span class="block-label"><i class="fas fa-utensils"></i> 最近3天常吃哪些？</span>
+            <div class="diet-group" id="dietGroup">
+                <button data-diet="spicy">🌶️ 辛辣</button>
+                <button data-diet="oily">🍗 油腻</button>
+                <button data-diet="sweet">🍰 甜食</button>
+                <button data-diet="veggie">🥗 清淡</button>
+                <button data-diet="dairy">🥛 乳制品</button>
+                <button data-diet="alcohol">🍺 饮酒</button>
+            </div>
+            <div class="diet-hint"><i class="far fa-hand-pointer"></i> 可多选，点一下选中，再点取消</div>
+        </div>
+
+        <!-- 诊断按钮 -->
+        <button class="diagnose-btn" id="diagnoseBtn">
+            <i class="fas fa-stethoscope"></i> 开始 AI 诊断
+        </button>
+
+        <!-- 结果区 -->
+        <div class="result-card" id="resultCard">
+            <div class="result-header">
+                <span><i class="fas fa-file-medical-alt"></i> 专属报告</span>
+                <span class="skin-tag" id="skinTag">混合肌</span>
+            </div>
+
+            <!-- 环境摘要 -->
+            <div class="env-summary" id="envSummary">
+                <span><i class="fas fa-map-marker-alt"></i> <span id="showRegion">北方</span></span>
+                <span><i class="fas fa-cloud-sun"></i> <span id="showSeason">春季</span></span>
+                <span><i class="fas fa-utensils"></i> <span id="showDiet">清淡</span></span>
+            </div>
+
+            <div id="reportContent">
+                <div class="report-item">
+                    <i class="fas fa-tint"></i>
+                    <span class="label">水润度</span>
+                    <span class="value" id="hydrationVal">💧 中等</span>
+                </div>
+                <div class="report-item">
+                    <i class="fas fa-fire"></i>
+                    <span class="label">油脂分泌</span>
+                    <span class="value" id="oilVal">⏺️ 均衡</span>
+                </div>
+                <div class="report-item">
+                    <i class="fas fa-hand-sparkles"></i>
+                    <span class="label">敏感指数</span>
+                    <span class="value" id="sensiVal">✅ 稳定</span>
+                </div>
+                <div class="report-item">
+                    <i class="fas fa-seedling"></i>
+                    <span class="label">推荐产品</span>
+                    <span class="value" id="productVal">🌿 积雪草精华</span>
+                </div>
+                <div class="report-item">
+                    <i class="fas fa-apple-alt"></i>
+                    <span class="label">饮食建议</span>
+                    <span class="value" id="dietAdviceVal">🥗 多吃蔬菜水果</span>
+                </div>
+            </div>
+
+            <div class="cta-row">
+                <button class="primary" id="couponBtn"><i class="fas fa-gift"></i> 领小样</button>
+                <button id="shareBtn"><i class="fas fa-share-alt"></i> 分享报告</button>
+            </div>
+        </div>
+
+        <div class="footer-info">
+            <span><i class="fas fa-check-circle"></i> 已测 3,172人</span>
+            <span><i class="fas fa-star"></i> 4.9星</span>
+            <span><i class="fas fa-shield-alt"></i> 隐私保护</span>
+        </div>
+        <div class="note"><i class="fas fa-microchip"></i> AI模拟诊断 · 基于环境与饮食综合评估</div>
+    </div>
+
+    <script>
+        (function() {
+            // ----- DOM 引用 -----
+            const uploadZone = document.getElementById('uploadZone');
+            const photoInput = document.getElementById('photoInput');
+            const avatarPreview = document.getElementById('avatarPreview');
+
+            const regionBtns = document.querySelectorAll('#regionGroup button');
+            const seasonBtns = document.querySelectorAll('#seasonGroup button');
+            const dietBtns = document.querySelectorAll('#dietGroup button');
+
+            const diagnoseBtn = document.getElementById('diagnoseBtn');
+            const resultCard = document.getElementById('resultCard');
+            const skinTag = document.getElementById('skinTag');
+
+            const hydrationVal = document.getElementById('hydrationVal');
+            const oilVal = document.getElementById('oilVal');
+            const sensiVal = document.getElementById('sensiVal');
+            const productVal = document.getElementById('productVal');
+            const dietAdviceVal = document.getElementById('dietAdviceVal');
+
+            const showRegion = document.getElementById('showRegion');
+            const showSeason = document.getElementById('showSeason');
+            const showDiet = document.getElementById('showDiet');
+
+            // ----- 状态 -----
+            let userImage = null;
+            let selectedRegion = 'north';
+            let selectedSeason = 1;
+            let selectedDiets = [];
+
+            // 映射表（显示用）
+            const regionMap = { north: '北方', south: '南方', west: '西部', coast: '沿海' };
+            const seasonMap = ['冬季', '春季', '夏季', '秋季'];
+
+            // ----- 上传 -----
+            uploadZone.addEventListener('click', () => photoInput.click());
+
+            photoInput.addEventListener('change', function(e) {
+                const file = e.target.files[0];
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = function(ev) {
+                    userImage = ev.target.result;
+                    avatarPreview.innerHTML = `<img src="${userImage}" alt="photo" />`;
+                    uploadZone.style.borderColor = '#a76f52';
+                };
+                reader.readAsDataURL(file);
+                photoInput.value = '';
+            });
+
+            // ----- 地域选择（单选） -----
+            regionBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    regionBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    selectedRegion = this.dataset.region;
+                });
+            });
+
+            // ----- 季节选择（单选） -----
+            seasonBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    seasonBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    selectedSeason = parseInt(this.dataset.season, 10);
+                });
+            });
+
+            // ----- 饮食选择（多选，toggle） -----
+            dietBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const diet = this.dataset.diet;
+                    const idx = selectedDiets.indexOf(diet);
+                    if (idx > -1) {
+                        selectedDiets.splice(idx, 1);
+                        this.classList.remove('active');
+                    } else {
+                        selectedDiets.push(diet);
+                        this.classList.add('active');
+                    }
+                });
+            });
+
+            // ----- 核心诊断逻辑 -----
+            function diagnose() {
+                if (!userImage) {
+                    if (!confirm('📸 还没上传照片，使用默认模型继续吗？')) return;
+                }
+
+                // ---- 1. 环境基础分 ----
+                // 地域因子: 北方干燥、南方湿热、西部干燥、沿海湿润
+                const regionFactors = {
+                    north: { humidity: -1, oil: 0, sensi: 0.5 },
+                    south: { humidity: 1, oil: 1.5, sensi: 0.8 },
+                    west: { humidity: -1.5, oil: -0.5, sensi: 0.3 },
+                    coast: { humidity: 1.5, oil: 0.5, sensi: 0.2 }
+                };
+                const rf = regionFactors[selectedRegion] || regionFactors.north;
+
+                // 季节因子: 冬干冷、夏湿热、春秋过渡
+                const seasonFactors = {
+                    0: { humidity: -1.5, oil: -1, sensi: 1.2 }, // 冬
+                    1: { humidity: 0.5, oil: 0, sensi: 0.3 }, // 春
+                    2: { humidity: 1.5, oil: 1.8, sensi: 0.6 }, // 夏
+                    3: { humidity: -0.5, oil: -0.5, sensi: 0.7 } // 秋
+                };
+                const sf = seasonFactors[selectedSeason] || seasonFactors[1];
+
+                // 饮食因子
+                let dietOil = 0,
+                    dietSensi = 0,
+                    dietHydra = 0;
+                let dietLabels = [];
+
+                selectedDiets.forEach(d => {
+                    if (d === 'spicy') { dietSensi += 1.2;
+                        dietLabels.push('辛辣'); }
+                    if (d === 'oily') { dietOil += 1.5;
+                        dietLabels.push('油腻'); }
+                    if (d === 'sweet') { dietOil += 0.5;
+                        dietSensi += 0.3;
+                        dietLabels.push('甜食'); }
+                    if (d === 'veggie') { dietHydra += 1.0;
+                        dietSensi -= 0.5;
+                        dietLabels.push('清淡'); }
+                    if (d === 'dairy') { dietSensi += 0.4;
+                        dietOil += 0.3;
+                        dietLabels.push('乳制品'); }
+                    if (d === 'alcohol') { dietSensi += 0.8;
+                        dietHydra -= 0.5;
+                        dietLabels.push('饮酒'); }
+                });
+
+                // 如果没有选饮食，默认给个温和值
+                if (selectedDiets.length === 0) {
+                    dietLabels.push('均衡');
+                    dietHydra += 0.3;
+                }
+
+                // ---- 2. 综合计算 ----
+                let totalHydra = 50 + rf.humidity * 8 + sf.humidity * 6 + dietHydra * 5;
+                let totalOil = 50 + rf.oil * 6 + sf.oil * 6 + dietOil * 7;
+                let totalSensi = 30 + rf.sensi * 5 + sf.sensi * 6 + dietSensi * 4;
+
+                // 限制范围 0-100
+                totalHydra = Math.max(10, Math.min(90, totalHydra));
+                totalOil = Math.max(10, Math.min(90, totalOil));
+                totalSensi = Math.max(5, Math.min(80, totalSensi));
+
+                // ---- 3. 生成描述 ----
+                let hydraText, oilText, sensiText, skinType, product, dietAdvice;
+
+                // 水润度
+                if (totalHydra >= 70) hydraText = '💧 水润饱满';
+                else if (totalHydra >= 50) hydraText = '💧 中等 · 建议补水';
+                else if (totalHydra >= 30) hydraText = '⚠️ 偏干 · 急需保湿';
+                else hydraText = '❄️ 极度缺水 · 强效滋润';
+
+                // 油脂
+                if (totalOil >= 70) oilText = '🔥 油脂旺盛 · 需控油';
+                else if (totalOil >= 50) oilText = '⏺️ 中等 · T区偏油';
+                else if (totalOil >= 30) oilText = '⏺️ 偏干 · 缺乏油脂';
+                else oilText = '⏸️ 极干 · 需补充油分';
+
+                // 敏感
+                if (totalSensi >= 60) sensiText = '⚠️ 高度敏感 · 需舒缓';
+                else if (totalSensi >= 40) sensiText = '⚠️ 轻度敏感 · 温和护理';
+                else if (totalSensi >= 20) sensiText = '✅ 较稳定 · 状态良好';
+                else sensiText = '✅ 非常稳定 · 屏障健康';
+
+                // 肤质判定
+                if (totalOil >= 60 && totalHydra < 50) skinType = '油性肌 · 外油内干';
+                else if (totalOil >= 60) skinType = '油性肌';
+                else if (totalOil <= 35 && totalHydra < 45) skinType = '干性肌 · 严重缺水';
+                else if (totalOil <= 35) skinType = '干性肌';
+                else if (totalOil >= 45 && totalOil <= 60 && totalHydra >= 45) skinType = '混合肌 · T区偏油';
+                else if (totalSensi >= 50) skinType = '敏感肌 · 屏障脆弱';
+                else skinType = '中性肌 · 状态均衡';
+
+                // 产品推荐
+                if (totalHydra < 35) product = '🌨️ 高保湿面霜 (强效锁水)';
+                else if (totalOil >= 60) product = '💚 清透控油凝露 (调节水油)';
+                else if (totalSensi >= 50) product = '🌿 积雪草舒缓精华 (修护屏障)';
+                else if (totalHydra >= 65 && totalOil <= 40) product = '🌸 保湿维稳乳 (日常养护)';
+                else product = '🌱 平衡修护精华 (适合多种肤质)';
+
+                // 饮食建议
+                if (selectedDiets.includes('spicy') && selectedDiets.includes('oily')) {
+                    dietAdvice = '🔥 辛辣+油腻 → 建议减少，多吃蔬菜';
+                } else if (selectedDiets.includes('spicy')) {
+                    dietAdvice = '🌶️ 辛辣刺激 → 注意抗炎，多补充维C';
+                } else if (selectedDiets.includes('oily')) {
+                    dietAdvice = '🍗 油腻饮食 → 建议增加膳食纤维';
+                } else if (selectedDiets.includes('sweet')) {
+                    dietAdvice = '🍰 甜食较多 → 减少糖分，预防糖化';
+                } else if (selectedDiets.includes('alcohol')) {
+                    dietAdvice = '🍺 饮酒影响代谢 → 多喝水，注意肝脏养护';
+                } else if (selectedDiets.includes('veggie')) {
+                    dietAdvice = '🥗 清淡饮食 → 继续保持！皮肤会感谢你';
+                } else {
+                    dietAdvice = '🥗 均衡饮食 → 多吃水果，肌肤更有光泽';
+                }
+
+                // ---- 4. 更新UI ----
+                hydrationVal.textContent = hydraText;
+                oilVal.textContent = oilText;
+                sensiVal.textContent = sensiText;
+                skinTag.textContent = skinType;
+                productVal.textContent = product;
+                dietAdviceVal.textContent = dietAdvice;
+
+                // 环境摘要
+                showRegion.textContent = regionMap[selectedRegion] || '未知';
+                showSeason.textContent = seasonMap[selectedSeason] || '春季';
+                showDiet.textContent = dietLabels.length ? dietLabels.join('、') : '均衡';
+
+                resultCard.classList.add('show');
+                setTimeout(() => resultCard.scrollIntoView({ behavior: 'smooth', block: 'center' }), 200);
+            }
+
+            diagnoseBtn.addEventListener('click', diagnose);
+
+            // ----- 领券 -----
+            document.getElementById('couponBtn').addEventListener('click', function() {
+                alert('🎉 恭喜！获得「植研所」专属小样体验券！\n到店出示即可领取。');
+                this.innerHTML = '<i class="fas fa-check"></i> 已领取';
+                this.disabled = true;
+                this.style.opacity = '0.6';
+            });
+
+            // ----- 分享 -----
+            document.getElementById('shareBtn').addEventListener('click', function() {
+                const shareData = {
+                    title: '我的AI肤质报告',
+                    text: '🌿 刚在「植研所」测了肤质！结合地域+饮食，超准！你也来试试 →',
+                    url: window.location.href
+                };
+                if (navigator.share) {
+                    navigator.share(shareData).catch(() => {});
+                } else {
+                    navigator.clipboard?.writeText(window.location.href).then(() => {
+                        alert('🔗 链接已复制！快去分享给朋友吧');
+                    }).catch(() => {
+                        alert('📱 截图分享给好友，一起测肤质！');
+                    });
+                }
+            });
+
+            // 默认选中饮食: 清淡（让界面不空）
+            document.querySelector('#dietGroup button[data-diet="veggie"]')?.classList.add('active');
+            selectedDiets.push('veggie');
+
+            console.log('✅ AI魔镜·多维版 已启动！');
+        })();
+    </script>
+</body>
+</html>
